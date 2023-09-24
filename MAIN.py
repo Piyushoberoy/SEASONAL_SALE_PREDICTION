@@ -6,8 +6,7 @@ from PIL import ImageTk, Image
 import numpy as np
 import joblib
 
-model = joblib.load("K:\PROJECT_SEASONAL_SALE_PREDICTION\Model.sav")
-
+model = joblib.load(r"K:\PROGRAMS\PYTHON\SSP\SEASONAL_SALE_PREDICTION\Model.pkl")
 
 class features:
     def __init__(self, frame):
@@ -24,18 +23,35 @@ class features:
         self.fg_color = "black"
 
         self._year_label = tk.Label(self.frame, text="Year")
-        self._year = tk.DoubleVar()
+        self._year = tk.IntVar(value=2002)
         self.year = tk.Entry(self.frame, textvariable=self._year, font=(self.font_style, self.font_size), bg=self.bg_color, fg=self.fg_color)
-
+        self.year.bind('<FocusOut>', self.validate_year)
+        
         self._week_label = tk.Label(self.frame, text="Week")
-        self._week = tk.DoubleVar()
+        self._week = tk.IntVar(value = 16)
         self.week = tk.Entry(self.frame, textvariable=self._week, font=(self.font_style, self.font_size), bg=self.bg_color, fg=self.fg_color)
+        self.week.bind('<FocusOut>', self.validate_week)
 
         self.find = tk.Button(self.frame, text="Find", command=self.show_result_form1, font=(self.font_style, self.font_size))
         self.find.grid(row=6, column=1, columnspan=4)
         self.home_btn = tk.Button(self.frame, text="Home", command=self.home, font=(self.font_style, self.font_size))
         self.home_btn.grid(row=7, column=1, columnspan=4)
+        
+    def validate_year(self, event):
+        year = int(self.year.get())
+        if year <= 1900:
+            self._year.set(1901)
+        elif year > 2200:
+            self._year.set(2200)
 
+    def validate_week(self, event):
+        week = int(self.week.get())
+        if week <= 0:
+            self._week.set(1)
+        elif week > 52:
+            self._week.set(52)
+
+    
     def home(self):
         self.frame.destroy()
         self.sub_frame.destroy()
@@ -53,7 +69,7 @@ class features:
         result = tk.Label(self.frame, textvariable=_result)
         
         try:
-            _ans = np.array(model.predict([[self._year.get(), self._week.get(), 24]]))
+            _ans = np.array(model.predict([[self._year.get(), self._week.get(), 1]]))
             temp = ""
             for a in _ans:
                 temp+=a
@@ -113,7 +129,7 @@ class Home:
         self.made_by.pack()
 
 def image(img):
-    path = "K:\PROJECT_SEASONAL_SALE_PREDICTION\PHOTOS"+"\\"
+    path = "K:\PROGRAMS\PYTHON\SSP\SEASONAL_SALE_PREDICTION\PHOTOS"+"\\"
     im = path+str(img)
     return ImageTk.PhotoImage(Image.open(im))
 
